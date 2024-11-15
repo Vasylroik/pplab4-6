@@ -1,36 +1,36 @@
 package utils;
 
+import commands.Command;
 import models.Car;
-
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.List;
-import java.util.ArrayList;
-import java.util.logging.Logger;
 
-public class LoadFromFileCSV {
-    private static final Logger logger = Logger.getLogger(LoadFromFileCSV.class.getName());
+public class LoadFromFileCSV implements Command {
+    private TaxiFleet taxiFleet;
+    private String filePath;
 
-    // Метод для завантаження автопарку з CSV файлу
-    public static List<Car> load(String filename) {
-        List<Car> cars = new ArrayList<>();
-        try (BufferedReader reader = new BufferedReader(new FileReader(filename))) {
-            // Пропуск заголовка
-            reader.readLine();
+    public LoadFromFileCSV(TaxiFleet taxiFleet, String filePath) {
+        this.taxiFleet = taxiFleet;
+        this.filePath = filePath;
+    }
+
+    public void execute() {
+        try (BufferedReader reader = new BufferedReader(new FileReader(filePath))) {
             String line;
             while ((line = reader.readLine()) != null) {
-                String[] data = line.split(",");
-                String model = data[0];
-                double price = Double.parseDouble(data[1]);
-                double fuelConsumption = Double.parseDouble(data[2]);
-                double speed = Double.parseDouble(data[3]);
-                cars.add(new Car(model, price, fuelConsumption, speed));
+                String[] carData = line.split(",");
+                if (carData.length == 4) {
+                    String model = carData[0];
+                    double price = Double.parseDouble(carData[1]);
+                    double fuelConsumption = Double.parseDouble(carData[2]);
+                    double speed = Double.parseDouble(carData[3]);
+
+                    taxiFleet.addCar(model, price, fuelConsumption, speed);
+                }
             }
-            logger.info("Fleet data loaded from CSV file.");
         } catch (IOException e) {
-            logger.severe("Error loading file: " + e.getMessage());
+            e.printStackTrace();
         }
-        return cars;
     }
 }
